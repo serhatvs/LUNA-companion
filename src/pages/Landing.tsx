@@ -1,4 +1,4 @@
-import { motion } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import {
   ArrowRight,
   Code2,
@@ -7,6 +7,7 @@ import {
   PawPrint,
   Sparkles,
 } from "lucide-react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router";
 
 import { Luna } from "@/components/luna/Luna";
@@ -82,7 +83,7 @@ function Nav() {
         <Link to="/" className="flex items-center gap-2.5">
           <Luna className="size-8" />
           <span className="text-lg font-bold tracking-tight">
-            Code Companion
+            Code Companion<span className="text-primary">-luna</span>
           </span>
         </Link>
         <nav className="hidden items-center gap-8 text-sm text-muted-foreground sm:flex">
@@ -108,7 +109,24 @@ function Nav() {
   );
 }
 
+const REACTIONS = ["meow!", "hi!", "purr…", "pet me?"];
+
+function pick<T>(items: T[]): T {
+  return items[Math.floor(Math.random() * items.length)];
+}
+
 function HeroMock() {
+  const [hopKey, setHopKey] = useState(0);
+  const [reaction, setReaction] = useState<{ id: number; text: string } | null>(
+    null,
+  );
+
+  useEffect(() => {
+    if (!reaction) return;
+    const timer = window.setTimeout(() => setReaction(null), 1800);
+    return () => window.clearTimeout(timer);
+  }, [reaction]);
+
   return (
     <div className="relative mx-auto mt-16 w-full max-w-xl">
       <motion.div
@@ -123,7 +141,7 @@ function HeroMock() {
           <span className="size-2.5 rounded-full bg-border" />
           <span className="size-2.5 rounded-full bg-border" />
           <span className="ml-2 text-xs text-muted-foreground">
-            companion
+            companion · luna
           </span>
         </div>
 
@@ -156,18 +174,46 @@ function HeroMock() {
         </div>
       </motion.div>
 
-      {/* perched cat */}
+      {/* perched cat — tap her for a reaction */}
       <motion.div
         initial={{ opacity: 0, scale: 0.8 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.6, delay: 0.9 }}
         className="absolute -top-8 -right-3 sm:-right-8"
       >
-        <div className="relative flex size-14 items-center justify-center rounded-2xl border bg-card shadow-sm">
-          <Luna idle className="size-10" />
-          <span className="absolute -bottom-1.5 -right-1.5 flex size-4 items-center justify-center rounded-full border border-background bg-emerald-500">
-            <span className="size-1.5 rounded-full bg-white" />
-          </span>
+        <div className="relative">
+          <AnimatePresence>
+            {reaction && (
+              <motion.div
+                key={reaction.id}
+                initial={{ opacity: 0, y: 6, scale: 0.9 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: -6, scale: 0.95 }}
+                transition={{ duration: 0.18 }}
+                className="absolute -top-7 left-1/2 z-10 -translate-x-1/2 rounded-xl border bg-card px-2.5 py-1 text-xs font-medium whitespace-nowrap text-card-foreground"
+              >
+                {reaction.text}
+              </motion.div>
+            )}
+          </AnimatePresence>
+          <motion.button
+            type="button"
+            key={`hero-hop-${hopKey}`}
+            animate={hopKey > 0 ? { y: [0, -10, 0] } : undefined}
+            transition={{ duration: 0.45, ease: "easeOut" }}
+            onClick={() => {
+              setHopKey((key) => key + 1);
+              setReaction({ id: Date.now(), text: pick(REACTIONS) });
+            }}
+            className="group relative flex size-14 cursor-pointer items-center justify-center rounded-2xl border bg-card transition-colors hover:border-primary/40"
+            aria-label="Pet Luna"
+            title="Pet Luna"
+          >
+            <Luna idle className="size-10 transition-transform group-hover:scale-105" />
+            <span className="absolute -bottom-1.5 -right-1.5 flex size-4 items-center justify-center rounded-full border border-background bg-emerald-500">
+              <span className="size-1.5 rounded-full bg-white" />
+            </span>
+          </motion.button>
         </div>
       </motion.div>
     </div>
@@ -375,7 +421,7 @@ function Footer() {
         <div className="flex items-center gap-2.5">
           <Luna className="size-6" />
           <span className="text-sm font-semibold tracking-tight">
-            Code Companion
+            Code Companion<span className="text-primary">-luna</span>
           </span>
         </div>
         <p className="text-xs text-muted-foreground">

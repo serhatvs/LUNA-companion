@@ -14,8 +14,8 @@ import {
   InputOTPSlot,
 } from "@/components/ui/input-otp";
 
+import { Luna } from "@/components/luna/Luna";
 import { useAuth } from "@/hooks/use-auth";
-import logo from "@/assets/logo.svg";
 import { ArrowRight, Loader2, Mail, UserX } from "lucide-react";
 import { Suspense, useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router";
@@ -121,14 +121,17 @@ function Auth({ redirectAfterAuth }: AuthProps = {}) {
             <>
               <CardHeader className="text-center">
               <div className="flex justify-center">
-                    <img
-                      src={logo}
-                      alt="Lock Icon"
-                      width={64}
-                      height={64}
-                      className="rounded-lg mb-4 mt-4 cursor-pointer"
+                    <button
+                      type="button"
                       onClick={() => navigate("/")}
-                    />
+                      className="group mb-4 mt-4 flex cursor-pointer flex-col items-center gap-2"
+                      aria-label="Back to home"
+                    >
+                      <Luna idle className="size-14 transition-transform group-hover:scale-105" />
+                      <span className="text-xs font-semibold tracking-tight text-muted-foreground">
+                        Code Companion<span className="text-primary">-luna</span>
+                      </span>
+                    </button>
                   </div>
                 <CardTitle className="text-xl">Get Started</CardTitle>
                 <CardDescription>

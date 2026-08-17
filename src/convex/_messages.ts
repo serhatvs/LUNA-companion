@@ -19,7 +19,7 @@ export const recentForUser = internalQuery({
 });
 
 /**
- * Internal — persists Nyang's reply after the AI call.
+ * Internal — persists Luna's reply after the AI call.
  * Lives in an underscore file so it is not exposed to the client.
  */
 export const saveAssistant = internalMutation({

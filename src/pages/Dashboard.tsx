@@ -29,7 +29,7 @@ export default function Dashboard() {
   const handleClear = async () => {
     await clear();
     toast("Chat cleared", {
-      description: "Nyang forgot everything — fresh start.",
+      description: "Luna forgot everything — fresh start.",
     });
   };
 
@@ -46,7 +46,7 @@ export default function Dashboard() {
         >
           <Luna className="size-8" />
           <span className="text-base font-bold tracking-tight">
-            Code Companion
+            Code Companion<span className="text-primary">-luna</span>
           </span>
         </button>
 

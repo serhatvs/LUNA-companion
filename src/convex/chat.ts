@@ -21,7 +21,7 @@ const MODEL = "gpt-4o-mini";
 const CONTEXT_WINDOW = 30;
 
 /**
- * Ask Nyang a question. Reads the user's recent conversation for context,
+ * Ask Luna a question. Reads the user's recent conversation for context,
  * calls the lightweight AI gateway, and persists the reply.
  */
 export const respond = action({
