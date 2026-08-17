@@ -10,7 +10,7 @@ import { useNavigate } from "react-router";
 import { toast } from "sonner";
 
 import { CompanionChat } from "@/components/companion/CompanionChat";
-import { PixelCat } from "@/components/nyang/PixelCat";
+import { Luna } from "@/components/luna/Luna";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/use-auth";
@@ -44,8 +44,10 @@ export default function Dashboard() {
           onClick={() => navigate("/")}
           className="flex cursor-pointer items-center gap-2.5 border-b px-5 py-4 text-left"
         >
-          <PixelCat className="size-8" />
-          <span className="text-base font-bold tracking-tight">Nyang</span>
+          <Luna className="size-8" />
+          <span className="text-base font-bold tracking-tight">
+            Code Companion
+          </span>
         </button>
 
         <nav className="flex flex-col gap-1 px-3 pt-6">
@@ -54,7 +56,7 @@ export default function Dashboard() {
           </p>
           <div className="flex items-center gap-2.5 rounded-lg bg-accent/60 px-3 py-2 text-sm font-medium text-accent-foreground">
             <MessageSquare className="size-4" />
-            Companion
+            Luna
           </div>
         </nav>
 
@@ -112,7 +114,7 @@ export default function Dashboard() {
               className="flex cursor-pointer items-center gap-2 md:hidden"
               aria-label="Go home"
             >
-              <PixelCat className="size-7" />
+              <Luna className="size-7" />
             </button>
             <div className="flex items-center gap-2.5">
               <span
@@ -123,10 +125,10 @@ export default function Dashboard() {
               <div>
                 <p className="flex items-center gap-1.5 text-sm font-semibold tracking-tight">
                   <Sparkles className="size-3.5 text-primary md:hidden" />
-                  Companion
+                  Luna
                 </p>
                 <p className="text-xs text-muted-foreground">
-                  Nyang is awake · always nearby
+                  awake · always nearby
                 </p>
               </div>
             </div>

@@ -4,12 +4,12 @@ import {
   Code2,
   Feather,
   Lock,
-  MessagesSquare,
+  PawPrint,
   Sparkles,
 } from "lucide-react";
 import { Link } from "react-router";
 
-import { PixelCat } from "@/components/nyang/PixelCat";
+import { Luna } from "@/components/luna/Luna";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/use-auth";
@@ -26,25 +26,25 @@ const FEATURES = [
     icon: Feather,
     title: "Featherweight",
     description:
-      "One purpose, one screen. No dashboards, plugins, or background chatter — Nyang starts fast and stays out of your way.",
+      "One purpose, one screen. No dashboards or plugins — just a fast chat that starts instantly and stays out of your way while your machine works.",
   },
   {
     icon: Code2,
     title: "Code-first answers",
     description:
-      "Paste errors, snippets, or half-formed ideas. Nyang replies in plain language with clean, copy-ready code blocks.",
+      "Paste errors, snippets, or half-formed ideas. Luna replies in plain language with clean, copy-ready code blocks.",
   },
   {
     icon: Lock,
-    title: "Just for you",
+    title: "Just for your team",
     description:
-      "Your own private thread. Conversations are kept per user and never shared with anyone else on the team.",
+      "A private space for your team. Conversations stay per user and are never shared beyond your workspace.",
   },
   {
-    icon: MessagesSquare,
-    title: "Remembers the thread",
+    icon: PawPrint,
+    title: "Playful by design",
     description:
-      "Recent context stays in mind, so follow-ups make sense without re-explaining — while keeping memory tiny.",
+      "Pet Luna, toss her the yarn, and watch her react. A few seconds of fun between builds — never a distraction.",
   },
 ];
 
@@ -57,12 +57,14 @@ const STEPS = [
   {
     number: "02",
     title: "Ask or paste",
-    description: "A quick question, a stack trace, a sketch of an idea.",
+    description:
+      "A quick question, a stack trace, or a half-formed idea — get clean, copy-ready answers.",
   },
   {
     number: "03",
-    title: "Copy & continue",
-    description: "Clean answers with code blocks ready to drop into your editor.",
+    title: "Play while you wait",
+    description:
+      "Pet Luna or play fetch while builds run and answers arrive.",
   },
 ];
 
@@ -78,8 +80,10 @@ function Nav() {
     >
       <div className="mx-auto flex h-16 w-full max-w-6xl items-center justify-between px-5 sm:px-8">
         <Link to="/" className="flex items-center gap-2.5">
-          <PixelCat className="size-8" />
-          <span className="text-lg font-bold tracking-tight">Nyang</span>
+          <Luna className="size-8" />
+          <span className="text-lg font-bold tracking-tight">
+            Code Companion
+          </span>
         </Link>
         <nav className="hidden items-center gap-8 text-sm text-muted-foreground sm:flex">
           <a href="#features" className="transition-colors hover:text-foreground">
@@ -131,7 +135,7 @@ function HeroMock() {
 
         <div className="mt-4 flex items-start gap-3">
           <div className="mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-lg border bg-card">
-            <PixelCat className="size-6" />
+            <Luna className="size-6" />
           </div>
           <div className="max-w-[85%] rounded-2xl rounded-tl-md border bg-card px-4 py-3 text-sm leading-relaxed">
             <p className="text-card-foreground">
@@ -160,7 +164,7 @@ function HeroMock() {
         className="absolute -top-8 -right-3 sm:-right-8"
       >
         <div className="relative flex size-14 items-center justify-center rounded-2xl border bg-card shadow-sm">
-          <PixelCat idle className="size-10" />
+          <Luna idle className="size-10" />
           <span className="absolute -bottom-1.5 -right-1.5 flex size-4 items-center justify-center rounded-full border border-background bg-emerald-500">
             <span className="size-1.5 rounded-full bg-white" />
           </span>
@@ -193,7 +197,7 @@ function Hero() {
             className="gap-1.5 rounded-full bg-card px-3 py-1 text-xs text-muted-foreground"
           >
             <Sparkles className="size-3 text-primary" />
-            For one developer · light on memory
+            For your team · internal use
           </Badge>
         </motion.div>
 
@@ -203,7 +207,7 @@ function Hero() {
           transition={{ duration: 0.6, delay: 0.1 }}
           className="mx-auto mt-6 max-w-3xl text-4xl font-bold tracking-tight text-balance sm:text-6xl"
         >
-          A coding buddy that{" "}
+          A coding companion that{" "}
           <span className="text-primary">takes up almost nothing</span>.
         </motion.h1>
 
@@ -213,10 +217,10 @@ function Hero() {
           transition={{ duration: 0.6, delay: 0.2 }}
           className="mx-auto mt-6 max-w-xl text-base leading-7 text-muted-foreground sm:text-lg sm:leading-8"
         >
-          Nyang is a featherweight AI companion for your working day. Ask
-          quick questions, paste errors, get clean answers with code — all
-          from one small screen that never hogs your memory or your
-          attention.
+          Luna is a tiny, playful AI cat that lives in your workspace. Ask
+          quick questions, paste errors, and get clean answers with code —
+          and when the build runs long, pet her or play fetch instead of
+          watching the spinner.
         </motion.p>
 
         <motion.div
@@ -227,7 +231,7 @@ function Hero() {
         >
           <Button asChild size="lg" className="cursor-pointer">
             <Link to={isAuthenticated ? "/dashboard" : "/auth?returnTo=%2Fdashboard"}>
-              {isAuthenticated ? "Open companion" : "Meet Nyang"}
+              {isAuthenticated ? "Open companion" : "Meet Luna"}
               <ArrowRight className="size-4" />
             </Link>
           </Button>
@@ -248,10 +252,10 @@ function Features() {
       <div className="mx-auto w-full max-w-6xl px-5 py-24 sm:px-8">
         <motion.div {...fadeUp} className="mx-auto max-w-2xl text-center">
           <p className="text-sm font-semibold uppercase tracking-widest text-primary">
-            What Nyang does
+            What Luna does
           </p>
           <h2 className="mt-3 text-3xl font-bold tracking-tight text-balance sm:text-4xl">
-            Everything Nyang does. Nothing it doesn&apos;t.
+            Everything Luna does. Nothing it doesn&apos;t.
           </h2>
           <p className="mt-4 text-base leading-7 text-muted-foreground">
             Version one stays deliberately small — so it stays fast, even
@@ -337,13 +341,13 @@ function CtaBand() {
           <div className="pointer-events-none absolute -bottom-24 -left-16 size-64 rounded-full bg-white/10 blur-3xl" />
 
           <div className="relative">
-            <PixelCat idle className="mx-auto size-16" />
+            <Luna idle className="mx-auto size-16" />
             <h2 className="mx-auto mt-6 max-w-xl text-3xl font-bold tracking-tight text-balance sm:text-4xl">
-              Your next commit has a friend.
+              Your next build has a friend.
             </h2>
             <p className="mx-auto mt-4 max-w-md text-sm leading-6 text-primary-foreground/80 sm:text-base">
-              Stop tab-switching for answers. Keep Nyang in the corner —
-              light, quiet, and ready when you are.
+              While you wait, Luna keeps you company — light, quiet, and
+              always up for a game of fetch.
             </p>
             <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
               <Button
@@ -352,7 +356,7 @@ function CtaBand() {
                 className="cursor-pointer bg-primary-foreground text-primary hover:bg-primary-foreground/90"
               >
                 <Link to={isAuthenticated ? "/dashboard" : "/auth?returnTo=%2Fdashboard"}>
-                  {isAuthenticated ? "Open companion" : "Meet Nyang"}
+                  {isAuthenticated ? "Open companion" : "Meet Luna"}
                   <ArrowRight className="size-4" />
                 </Link>
               </Button>
@@ -369,11 +373,13 @@ function Footer() {
     <footer className="border-t border-border/70">
       <div className="mx-auto flex w-full max-w-6xl flex-col items-center justify-between gap-4 px-5 py-8 sm:flex-row sm:px-8">
         <div className="flex items-center gap-2.5">
-          <PixelCat className="size-6" />
-          <span className="text-sm font-semibold tracking-tight">Nyang</span>
+          <Luna className="size-6" />
+          <span className="text-sm font-semibold tracking-tight">
+            Code Companion
+          </span>
         </div>
         <p className="text-xs text-muted-foreground">
-          Built for one. Light by design. © 2026
+          Built for your team. Light by design. © 2026
         </p>
       </div>
     </footer>
