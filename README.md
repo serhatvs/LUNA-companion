@@ -43,10 +43,33 @@ The window opens small (420×660) and stays on top of your editor — that's
 the point. To change the size or turn off always-on-top, edit
 `src-tauri/tauri.conf.json`.
 
-> Packaging note: installer icons aren't committed yet. When you want to ship
-> installers, drop a 1024×1024 PNG at `src-tauri/icons/icon.png`, run
-> `bunx tauri icon`, and set `bundle.active` to `true` in
-> `src-tauri/tauri.conf.json`.
+### Downloading / installing the app
+
+There are two ways to get an installer, depending on whether you want to
+build on your own machine or have GitHub do it for you:
+
+**Option A — build it yourself.** Requires [Bun](https://bun.sh) and Rust
+(stable). On your machine:
+
+```bash
+bun install
+bun run tauri:build
+```
+
+The installer lands in `src-tauri/target/release/bundle/` — a `.msi`/
+`.exe` on Windows, a `.dmg` on macOS, or a `.deb`/`.AppImage` on Linux.
+Double-click it and Luna is installed.
+
+**Option B — let GitHub Actions build it.** Push this repo to GitHub, then
+open the **Actions** tab → **Build desktop app** → **Run workflow**. A few
+minutes later, download your platform's installer from the run's
+**Artifacts** section. (For a formal release, push a tag like `v0.1.0` and
+the workflow drafts a GitHub Release with the installers attached.)
+
+Note: installers are unsigned, so Windows SmartScreen and macOS
+Gatekeeper will show a warning on first run — click through, it's your own
+app. Bundling/notarization can be added later if you want to share it
+beyond your team.
 
 ### As a web preview (sandbox)
 
@@ -67,6 +90,15 @@ src/
   components/luna/LunaRoom.tsx — the room: sky, desk, fetch, feeding, sleep
   components/luna/useLunaSounds.ts — synthesized meow/purr/eat/chirp
 src-tauri/                     — Tauri v2 desktop shell
+```
+
+### App icon
+
+`src-tauri/icons/` is generated from Luna's own pixel art — no designer
+needed. To regenerate it after tweaking her sprite:
+
+```bash
+bun run tauri:icons
 ```
 
 ## Keeping it featherweight

@@ -10,7 +10,8 @@
     "format": "prettier --write .",
     "preview": "vite preview",
     "tauri:dev": "tauri dev",
-    "tauri:build": "tauri build"
+    "tauri:build": "tauri build",
+    "tauri:icons": "bun scripts/generate-icon.mjs && tauri icon src-tauri/icons/icon.png"
   },
   "dependencies": {
     "@convex-dev/auth": "^0.0.90",
