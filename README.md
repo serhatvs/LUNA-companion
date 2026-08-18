@@ -123,6 +123,5 @@ bun run tauri:icons
 - One React screen, no router, no state library, no images — Luna is
   hand-drawn SVG rectangles and everything else is plain DOM.
 - Sounds are generated, not loaded: zero network requests at runtime.
-- The `src/convex/` folder from the earlier prototype is still in the repo
-  but is **not imported anywhere** — the desktop pet runs fully offline.
-  Delete it whenever you're ready.
+- No backend at all: the Convex server from the earlier web prototype was
+  removed, so the pet runs fully offline and holds onto nothing.
