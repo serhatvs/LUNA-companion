@@ -7,7 +7,12 @@ on:
   workflow_dispatch:
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  # Pushes supersede each other; a run started by hand stands on its own, so
+  # clicking "Run workflow" cannot kill a build that is already going.
+  group: >-
+    ${{ github.workflow }}-${{
+      github.event_name == 'workflow_dispatch' && github.run_id || github.ref
+    }}
   cancel-in-progress: true
 
 jobs:
@@ -26,8 +31,10 @@ jobs:
             os: macos-latest
             target: aarch64-apple-darwin
             bundles: dmg
+          # Cross-compiled on an Apple silicon runner: the macos-13 Intel
+          # runners are being retired and can sit in the queue for an hour.
           - label: macOS (Intel)
-            os: macos-13
+            os: macos-latest
             target: x86_64-apple-darwin
             bundles: dmg
           - label: Linux (x64)
