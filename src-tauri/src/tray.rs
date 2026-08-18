@@ -1,14 +1,22 @@
 //! Tray icon: the only chrome Luna has.
 
-use tauri::menu::{CheckMenuItemBuilder, MenuBuilder, MenuItemBuilder};
-use tauri::tray::{MouseButton, MouseButtonState, TrayIconBuilder, TrayIconEvent};
-use tauri::{AppHandle, Emitter, Manager, Runtime};
+use std::sync::Mutex;
+
+use tauri::menu::{CheckMenuItem, CheckMenuItemBuilder, MenuBuilder, MenuItemBuilder};
+use tauri::tray::{MouseButton, TrayIconBuilder, TrayIconEvent};
+use tauri::{AppHandle, Emitter, Manager, Wry};
 
 use crate::{paths, state::AppState};
 
 pub const GHOST_ITEM: &str = "ghost";
 
-pub fn build<R: Runtime>(app: &AppHandle<R>) -> tauri::Result<()> {
+/// Kept so the tick beside "Ghost mode" can be corrected when ghost mode is
+/// toggled from somewhere else - the panel, the CLI, a fullscreen game.
+pub struct TrayHandles {
+    pub ghost: Mutex<Option<CheckMenuItem<Wry>>>,
+}
+
+pub fn build(app: &AppHandle) -> tauri::Result<()> {
     let summon = MenuItemBuilder::with_id("summon", "Come here, Luna").build(app)?;
     let ghost = CheckMenuItemBuilder::with_id(GHOST_ITEM, "Ghost mode (click-through)")
         .checked(false)
@@ -30,7 +38,7 @@ pub fn build<R: Runtime>(app: &AppHandle<R>) -> tauri::Result<()> {
     let mut builder = TrayIconBuilder::with_id("luna-tray")
         .tooltip("Luna")
         .menu(&menu)
-        .show_menu_on_left_click(false)
+        .show_menu_on_left_click(true)
         .on_menu_event(|app, event| {
             let id = event.id().as_ref();
             match id {
@@ -56,9 +64,8 @@ pub fn build<R: Runtime>(app: &AppHandle<R>) -> tauri::Result<()> {
 
     builder
         .on_tray_icon_event(|tray, event| {
-            if let TrayIconEvent::Click {
+            if let TrayIconEvent::DoubleClick {
                 button: MouseButton::Left,
-                button_state: MouseButtonState::Up,
                 ..
             } = event
             {
@@ -66,6 +73,10 @@ pub fn build<R: Runtime>(app: &AppHandle<R>) -> tauri::Result<()> {
             }
         })
         .build(app)?;
+
+    app.manage(TrayHandles {
+        ghost: Mutex::new(Some(ghost)),
+    });
 
     Ok(())
 }
@@ -77,7 +88,13 @@ pub fn sync_ghost(app: &AppHandle, on: bool) {
             shared.ghost = on;
         }
     }
-    // The menu item is rebuilt rarely; a missing handle is not worth failing on.
+    if let Some(handles) = app.try_state::<TrayHandles>() {
+        if let Ok(item) = handles.ghost.lock() {
+            if let Some(item) = item.as_ref() {
+                let _ = item.set_checked(on);
+            }
+        }
+    }
     if let Some(tray) = app.tray_by_id("luna-tray") {
         let _ = tray.set_tooltip(Some(if on { "Luna (ghost mode)" } else { "Luna" }));
     }
