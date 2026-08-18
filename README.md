@@ -1,56 +1,52 @@
-# Code Companion-luna
+# Code Companion · Luna
 
-A featherweight coding companion that lives on your desktop — just a chat with
-Luna, a tiny pixel cat who answers code questions and plays fetch while your
-builds run. That's the whole app: no landing page, no workspace, no login
-screen.
+A featherweight desktop pet for people who spend their days waiting on
+builds. Luna is a tiny pixel cat who sits on her desk under a moonlit sky —
+pet her, drag her ball of yarn, feed her, and she purrs right back. That's
+the whole app: no landing page, no workspace, no login, no backend.
 
 ## What it is
 
-- **One screen.** Open it and Luna is already there. Ask a question, paste an
-  error, get a clean answer with copy-ready code.
-- **Play while you wait.** Pat Luna, or drag the ball of yarn and she fetches
-  it. The playpen pops open automatically whenever Luna is thinking.
-- **Private.** Your conversation belongs to you. The app quietly signs itself
-  in as a guest on first launch — the session persists per machine, so there
-  is never a login form to fill out.
-- **Lightweight.** The UI is a single React screen (no heavy routing, no
-  dashboards). Packaged with Tauri it runs inside your OS's own webview, so
-  the app itself uses almost no memory while you work.
-
-## Tech stack
-
-- Vite + React 19 + TypeScript
-- Tailwind CSS v4 + shadcn/ui + Framer Motion
-- Convex (backend + database) with Convex Auth (anonymous sessions)
-- Tauri v2 (`src-tauri/`) for the desktop shell
+- **A desktop app, not a website.** Built with [Tauri v2](https://tauri.app),
+  so it runs inside your OS's own webview — a few MB on disk, near-zero idle
+  CPU, and it shares the browser engine you already have instead of bundling
+  a second one (that's what keeps it light while your memory is busy with
+  builds and editors).
+- **Companion only.** There is no chat, no dashboard, no accounts. The window
+  opens and Luna is already there.
+- **Play while you wait.** Pet her (she squishes, purrs, and says something
+  sweet), drag the yarn ball and she fetches it, tap her bowl to feed her.
+  Leave her alone for a couple of minutes and she dozes off — click to wake
+  her.
+- **It remembers you.** Affection hearts build up as you play and slowly fade
+  while she's away, stored locally on your machine (`localStorage`). No
+  servers, nothing leaves your computer.
+- **Tiny voice.** Her meows, purrs, and munching are synthesized with the Web
+  Audio API — no sound files, no assets, ~1 KB of code. Mute her with the
+  speaker button in the header.
 
 ## Running it
 
 ### As a desktop app (what it's for)
 
 Prerequisites: [Bun](https://bun.sh), Rust (stable), and your OS's webview
-dependencies (WebKitGTK on Linux).
+dependencies (WebKitGTK on Linux, WebView2 on Windows — usually already
+present on macOS/Windows).
 
 ```bash
 bun install
-bunx tauri dev        # run in a real desktop window
-bunx tauri build      # produce the app binary
+bun run tauri:dev       # run in a real desktop window
+bun run tauri:build     # produce the app binary
 ```
 
-Notes:
+The window opens small (420×660) and stays on top of your editor — that's
+the point. To change the size or turn off always-on-top, edit
+`src-tauri/tauri.conf.json`.
 
-- `VITE_CONVEX_URL` is read at build time — keep the same value you already
-  use in this project (it's set for you in the sandbox; on your machine,
-  create a `.env` with it or export it).
-- The AI replies go through the project's Convex deployment, so the app needs
-  internet to answer questions. Everything else — chat history, Luna, the
-  playpen — works off the same backend.
-- Installer icons are not committed yet. When you want to ship installers,
-  put a 1024×1024 PNG at `src-tauri/icon.png` and run `bunx tauri icon`, then
-  set `bundle.active` to `true` in `src-tauri/tauri.conf.json`.
-- Want to swap in your own AI provider later? The model call lives in
-  `src/convex/chat.ts` — one function, easy to point elsewhere.
+> Packaging note: installer icons aren't committed yet. When you want to ship
+> installers, drop a 1024×1024 PNG at `src-tauri/icons/icon.png`, run
+> `bunx tauri icon`, and set `bundle.active` to `true` in
+> `src-tauri/tauri.conf.json`.
 
 ### As a web preview (sandbox)
 
@@ -58,31 +54,26 @@ Notes:
 bun run dev
 ```
 
-The `/` route is the companion itself; any other path redirects back to it.
+The same single screen renders in the browser — good for iterating on the
+scene and Luna's behavior without a Rust toolchain.
 
 ## Project layout
 
 ```
 src/
-  main.tsx                     — single-route bootstrap
-  pages/Companion.tsx          — the whole app (silent guest sign-in + chat)
-  components/companion/        — chat, message rendering
-  components/luna/             — Luna the pixel cat, and her playpen
-  convex/                      — backend: messages, chat action, auth
-src-tauri/                     — Tauri desktop shell
+  main.tsx                     — bootstrap (no router, no auth, no backend)
+  pages/Companion.tsx          — the pet window shell (header, hearts, sound)
+  components/luna/Luna.tsx     — the pixel-cat sprite (idle / sleeping / eating)
+  components/luna/LunaRoom.tsx — the room: sky, desk, fetch, feeding, sleep
+  components/luna/useLunaSounds.ts — synthesized meow/purr/eat/chirp
+src-tauri/                     — Tauri v2 desktop shell
 ```
 
-## Backend notes
+## Keeping it featherweight
 
-- `src/convex/messages.ts` — one private thread per user (capped at 200
-  messages so it stays featherweight). `send`, `list`, `clear`.
-- `src/convex/chat.ts` — the AI action: builds recent context, calls the
-  model gateway, saves Luna's reply. `src/convex/_messages.ts` holds the
-  internal queries/mutations it uses.
-- Auth files (`src/convex/auth.ts`, `auth.config.ts`, `auth/emailOtp.ts`,
-  `src/convex/users.ts`) are managed by the platform — don't modify them.
-
-## Environment variables
-
-`VITE_CONVEX_URL` — the Convex deployment URL (frontend). Server-side auth
-keys live in the Convex deployment's environment, not in `.env` files.
+- One React screen, no router, no state library, no images — Luna is
+  hand-drawn SVG rectangles and everything else is plain DOM.
+- Sounds are generated, not loaded: zero network requests at runtime.
+- The `src/convex/` folder from the earlier prototype is still in the repo
+  but is **not imported anywhere** — the desktop pet runs fully offline.
+  Delete it whenever you're ready.

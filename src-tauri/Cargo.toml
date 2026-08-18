@@ -1,8 +1,8 @@
 [package]
 name = "code-companion-luna"
 version = "0.1.0"
-description = "A featherweight coding companion that lives on your desktop"
-authors = ["you"]
+description = "Code Companion · Luna — a featherweight desktop pet for your builds"
+authors = ["your team"]
 edition = "2021"
 
 [lib]
