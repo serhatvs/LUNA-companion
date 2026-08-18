@@ -11,6 +11,7 @@ import type { Mind } from "./mind";
 import { Bubble, Laser, Panel, Timer, puff } from "./ui";
 import { duration, errorHint, line, type LineKey } from "./chatter";
 import * as bridge from "./bridge";
+import { nearest, neighbour, onScreen } from "./screens";
 
 export interface World {
   /** Window size in CSS px. */
@@ -114,23 +115,39 @@ export class Luna {
   }
 
   private monitorAt(cx: number): { x: number; y: number; w: number; h: number } {
-    const list = this.world.monitors;
-    if (list.length === 0) return { x: 0, y: 0, w: this.world.w, h: this.world.h };
-    let best = list[0]!;
-    let bestDist = Infinity;
-    for (const m of list) {
-      if (cx >= m.x && cx <= m.x + m.w) return m;
-      const d = cx < m.x ? m.x - cx : cx - (m.x + m.w);
-      if (d < bestDist) {
-        bestDist = d;
-        best = m;
-      }
-    }
-    return best;
+    return nearest(this.world.monitors, cx, { x: 0, y: 0, w: this.world.w, h: this.world.h });
   }
 
   private get here(): { x: number; y: number; w: number; h: number } {
     return this.monitorAt(this.x + this.size.w / 2);
+  }
+
+  private onScreen(cx: number): boolean {
+    return onScreen(this.world.monitors, cx);
+  }
+
+  /**
+   * Monitors are rarely edge to edge - yours have hundreds of pixels of
+   * nothing between them, and that nothing is on no screen at all. So when a
+   * walk carries her off the end of one display she steps straight onto the
+   * near edge of the next, instead of trudging invisibly across the void.
+   */
+  private crossScreens(dir: 1 | -1): boolean {
+    const cx = this.x + this.size.w / 2;
+    if (this.onScreen(cx)) return true;
+
+    const next = neighbour(this.world.monitors, cx, dir);
+    if (!next) {
+      // Nothing over there: stay on the screen she just left.
+      const m = this.here;
+      this.x = clamp(this.x, m.x, m.x + m.w - this.size.w);
+      this.target = clamp(this.target, m.x, m.x + m.w - this.size.w);
+      return false;
+    }
+
+    this.x = dir > 0 ? next.x + 2 : next.x + next.w - this.size.w - 2;
+    this.y = this.floorOf(next);
+    return true;
   }
 
   private floorOf(m: { y: number; h: number }): number {
@@ -228,12 +245,22 @@ export class Luna {
   }
 
   private walkSomewhere(far: boolean): void {
-    const m = this.here;
-    const span = m.w - this.size.w;
-    const from = this.x - m.x;
-    const to = far ? rand(0, span) : clamp(from + rand(-span * 0.4, span * 0.4), 0, span);
-    this.target = m.x + to;
-    this.begin("walk", 20000);
+    const screens = this.world.monitors;
+    // Now and then she decides she would rather be on a different screen.
+    const roam = screens.length > 1 && (far ? chance(0.55) : chance(0.15));
+    const here = this.here;
+    const m = roam
+      ? screens.filter((s) => s !== here)[Math.floor(Math.random() * (screens.length - 1))] ?? here
+      : here;
+
+    const span = Math.max(1, m.w - this.size.w);
+    if (m === here && !far) {
+      const from = this.x - m.x;
+      this.target = m.x + clamp(from + rand(-span * 0.4, span * 0.4), 0, span);
+    } else {
+      this.target = m.x + rand(span * 0.1, span * 0.9);
+    }
+    this.begin("walk", 90000);
   }
 
   private startClimb(): void {
@@ -491,6 +518,12 @@ export class Luna {
       }
     }
 
+    // Whatever just happened, she belongs on a screen the user can see.
+    if (this.act !== "drag" && !this.onScreen(this.x + this.size.w / 2)) {
+      const m = this.here;
+      this.x = clamp(this.x, m.x, m.x + m.w - this.size.w);
+    }
+
     // The squash spring always relaxes back to neutral.
     this.squash += (0 - this.squash) * Math.min(1, dt / 90);
 
@@ -550,10 +583,16 @@ export class Luna {
   }
 
   private stepWalk(dt: number): void {
-    const speed = WALK * this.mind.settings.speed * (0.7 + this.mind.stats.energy * 0.5);
+    const m = this.here;
+    // A trip to another screen is a purposeful trot; pottering about is not.
+    const away = this.target < m.x - 1 || this.target + this.size.w > m.x + m.w + 1;
+    const speed =
+      WALK * this.mind.settings.speed * (0.7 + this.mind.stats.energy * 0.5) * (away ? 2.4 : 1);
     const dx = this.target - this.x;
     if (Math.abs(dx) < 2 || now() > this.actEnd) {
       this.x = Math.abs(dx) < 6 ? this.target : this.x;
+      // Never end a walk standing on no screen at all.
+      if (!this.onScreen(this.x + this.size.w / 2)) this.crossScreens(this.facing);
       if (this.climbAfterWalk) {
         this.climbAfterWalk = false;
         this.begin("climb", 1e9);
@@ -566,10 +605,14 @@ export class Luna {
       this.begin("idle", rand(1200, 4000));
       return;
     }
-    this.facing = dx > 0 ? 1 : -1;
-    this.x += Math.sign(dx) * Math.min(speed * dt, Math.abs(dx));
+    const dir: 1 | -1 = dx > 0 ? 1 : -1;
+    this.facing = dir;
+    this.x += dir * Math.min(speed * dt, Math.abs(dx));
 
-    // Walking off one monitor and onto the next is just walking.
+    if (!this.crossScreens(dir)) {
+      this.begin("idle", rand(800, 2000));
+      return;
+    }
     this.y = this.floorOf(this.here);
   }
 
@@ -579,8 +622,11 @@ export class Luna {
     this.lean = clamp((this.cursor.y - this.y) * -0.01, -1.5, 0.5);
     if (Math.abs(dx) > 14) {
       const speed = WALK * this.mind.settings.speed * 1.25;
-      this.facing = dx > 0 ? 1 : -1;
-      this.x += Math.sign(dx) * Math.min(speed * dt, Math.abs(dx));
+      const dir: 1 | -1 = dx > 0 ? 1 : -1;
+      this.facing = dir;
+      this.x += dir * Math.min(speed * dt, Math.abs(dx));
+      this.crossScreens(dir);
+      this.y = this.floorOf(this.here);
     }
     if (now() > this.actEnd) {
       this.lean = 0;
