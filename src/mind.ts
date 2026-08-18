@@ -59,7 +59,7 @@ export interface Saved {
 }
 
 const DEFAULT_SETTINGS: Settings = {
-  fur: "cream",
+  fur: "midnight",
   zoom: 3,
   speed: 1,
   chatty: "normal",

@@ -1,0 +1,36 @@
+<!doctype html>
+<html>
+  <head><meta charset="utf-8" /><title>Luna sprite</title>
+  <style>
+    body{background:#26232e;color:#eee;font:12px system-ui;margin:0;padding:16px}
+    .grid{display:flex;flex-wrap:wrap;gap:14px}
+    .cell{text-align:center}
+    canvas{image-rendering:pixelated;background:#ffffff;border-radius:6px}
+    h3{margin:16px 0 8px;font-weight:600}
+    .cap{opacity:.6;margin-top:4px}
+  </style></head>
+  <body>
+    <h3>big</h3><div class="grid" id="big"></div>
+    <h3>poses</h3><div class="grid" id="a"></div>
+    <h3>coats</h3><div class="grid" id="b"></div>
+    <h3>eyes</h3><div class="grid" id="c"></div>
+    <script type="module">
+      import { CatRenderer, FUR_ORDER, W, H } from "/src/sprite.ts";
+      const P = (o) => ({ form:"sit", t:400, eyes:"open", mouth:"smile", squash:0, lean:0, ...o });
+      function cell(box, label, pose, fur, zoom){
+        const wrap=document.createElement("div"); wrap.className="cell";
+        const c=document.createElement("canvas"); wrap.appendChild(c);
+        const cap=document.createElement("div"); cap.className="cap"; cap.textContent=label; wrap.appendChild(cap);
+        box.appendChild(wrap);
+        const r=new CatRenderer(c); r.setZoom(zoom); r.draw(pose, fur, 1);
+        c.style.width=(W*zoom)+"px"; c.style.height=(H*zoom)+"px";
+      }
+      cell(big,"sit",P({}),"midnight",11);
+      cell(big,"walk",P({form:"walk",t:900}),"midnight",11);
+      for(const f of ["sit","walk","run","sleep","fall","hang","climb","stretch","cheer","sad","eat","groom","watch"])
+        cell(a,f,P({form:f,t:420}),"midnight",5);
+      for(const f of FUR_ORDER) cell(b,f,P({}),f,5);
+      for(const e of ["open","closed","happy","sad","wide","wink"]) cell(c,e,P({eyes:e}),"midnight",6);
+    </script>
+  </body>
+</html>
