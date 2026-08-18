@@ -1,142 +1,130 @@
-# Code Companion · Luna
+# Luna
 
-A featherweight desktop pet for people who spend their days waiting on
-builds. Luna is a tiny pixel cat who **lives on your screen** like a classic
-screen pet (think Shimeji or ComNyang): she wanders around over your windows,
-you can grab her and throw her, she purrs when you pet her, and she dozes off
-if you ignore her. That's the whole app: no chat, no dashboard, no login, no
-backend.
+A featherweight desktop cat who waits for your builds.
 
-## What it is
+Luna is not a web app in a window. She is a tiny pixel cat who lives *on* your
+desktop — above your editor, walking across your monitors, sleeping when you
+ignore her, and, when you point the `luna` CLI at a build, sitting very still
+until it finishes and then either dancing or sulking.
 
-- **A desktop pet, not a window.** Built with [Tauri v2](https://tauri.app),
-  so it runs inside your OS's own webview — a few MB on disk, near-zero idle
-  CPU, and it shares the browser engine you already have instead of bundling
-  a second one (that's what keeps it light while your memory is busy with
-  builds and editors).
-- **She walks around your screen.** The window is a tiny transparent,
-  frameless, always-on-top square — barely bigger than Luna herself — and it
-  glides across your monitor above the taskbar. No title bar, no taskbar
-  entry, no focus steal: she never pulls focus away from your editor.
-- **Grab her and throw her.** Click and drag Luna — she dangles upside down
-  from your cursor, squeaking. Flick her and she tumbles through the air,
-  bounces off the edges, and lands with a puff of dust and an "oomph!".
-- **Pet her.** A plain click (no drag) is a pat: she lights up happy, says
-  something sweet, and purrs.
-- **She has a life of her own.** She wanders back and forth along the bottom
-  of your screen, sits down, watches your cursor as it passes, blinks, and
-  mutters idle lines. Leave her alone for a couple of minutes and she dozes
-  off with floating z's — click her to wake her up.
-- **Ghost mode.** Right-click her (or press **Ctrl+Alt+L** from anywhere,
-  even mid-build) and she stops catching clicks entirely: she floats over
-  your code without blocking a single click. Press Ctrl+Alt+L again to bring
-  her back.
-- **Right-click menu.** Toggle ghost mode, mute/unmute her, or close her.
-- **Tiny voice.** Her meows, purrs, squeaks, and thuds are synthesized with
-  the Web Audio API — no sound files, no assets, ~1 KB of code. Mute her
-  from the right-click menu; the preference is stored locally.
+No chat, no dashboard, no login, no backend, no account. One window, one tray
+icon, one small JSON file with her mood in it.
+
+```
+luna watch "npm run build"
+```
+
+---
+
+## What she does
+
+**She waits with you.** `luna watch <command>` runs your command exactly as your
+shell would — same output, same exit code — and tells Luna about it. She sits up
+with her ears forward, wears a live timer above her head (`42s / ~1m 10s`, once
+she has seen that command before), then either does a victory hop with the build
+time, or slumps with the first real-looking error line from the output.
+
+**She has a life.** Energy, hunger, boredom and a craving for attention all move
+in real time and shape what she does next. Ignore her for an afternoon and she
+follows your cursor around; leave her alone entirely and she naps and gets
+hungry. Pet her, feed her, play with her, and she grows a bond stat and levels
+up. All of it survives a restart, including the hours she spent alone while the
+app was closed.
+
+**She is a real screen pet.** Grab her and throw her — she has weight, bounces,
+squashes on landing, and grabs the edge of your screen on the way past. She
+climbs the side of a monitor, dangles from the top, wanders between displays,
+chases a laser dot when you double-click her, grooms, stretches after a nap, and
+flicks her tail while she waits.
+
+**She knows when to disappear.** Ghost mode makes her click-through and faint.
+Auto-ghost does it for you whenever a fullscreen app takes over (games,
+presentations). Quiet hours put her to bed and shut her up. She can start with
+your computer, and she never steals focus from your editor when you pet her.
 
 ## Controls
 
 | Action | What happens |
 | --- | --- |
-| Click Luna (no drag) | She's petted: happy pose, purr, sweet bubble |
-| Drag + flick Luna | She dangles, then flies — bounces, lands, dust puff |
-| Click her while asleep | She wakes up grumpy ("mrr?!") |
-| Right-click her | Menu: ghost mode, mute, close |
-| **Ctrl+Alt+L** | Toggle ghost mode (click-through) from anywhere |
+| Move the cursor back and forth over her | pets her — hearts, purring, a happier cat |
+| Click and drag | picks her up; let go to throw |
+| Double-click | laser pointer |
+| Right-click | her settings card |
+| Tray icon | summon, ghost mode, nap, settings, quit |
 
-## Running it
+## The CLI
 
-### As a desktop app (what it's for)
+The `luna` binary is installed next to the app.
 
-Prerequisites: [Bun](https://bun.sh), Rust (stable), and your OS's webview
-dependencies (WebKitGTK on Linux, WebView2 on Windows — usually already
-present on macOS/Windows).
+```
+luna watch <command...>   run a command; Luna waits, then cheers or sulks
+luna say <text>           make her say something
+luna ghost [on|off]       click-through mode
+luna summon               bring her to your cursor
+luna sleep                tell her to take a nap
+luna status               print how she's doing
+```
+
+Put it on your PATH and it becomes a prefix you can leave in front of anything
+slow:
 
 ```bash
-bun install
-bun run tauri:dev       # run in a real desktop window
-bun run tauri:build     # produce the app binary
+luna watch cargo test
+luna watch "bun run build"
+luna say "back in 10"
 ```
 
-Luna opens as a tiny transparent square (150×180) parked at the
-bottom-center of your screen, always on top of your editor, and starts
-wandering — that's the point. To change the window size or behavior, edit
-`src-tauri/tauri.conf.json` and `src-tauri/src/lib.rs`.
+It talks to the running app over loopback with a token that is rewritten every
+launch, so nothing else on the machine can drive your cat.
 
-### Downloading / installing the app
+## Why it is small
 
-There are two ways to get an installer, depending on whether you want to
-build on your own machine or have GitHub do it for you:
+- **No framework.** No React, no Tailwind, no UI kit — the whole frontend is a
+  few kilobytes of plain TypeScript.
+- **No image assets.** Luna is drawn as a 26×24 grid of pixels from discs and
+  rectangles, so every pose is parameterised (the tail curls, she squashes when
+  she lands) and a new fur colour is a five-entry palette swap.
+- **Nothing repaints.** Her window is one transparent sheet across all your
+  monitors, but only a 78×72 box is ever drawn into, at about 14 frames a
+  second, and moving her is a compositor transform. When she is sitting still
+  with her eyes open, nothing is drawn at all.
+- **The heavy lifting is Rust.** Hit testing, click-through, the tray, the
+  overlay and the CLI channel are all native; the webview just draws a cat.
 
-**Option A — build it yourself.** Requires [Bun](https://bun.sh) and Rust
-(stable). On your machine:
+## Building
+
+You need [Node 18+](https://nodejs.org) and a
+[Rust toolchain](https://rustup.rs), plus the usual Tauri prerequisites for
+your platform (MSVC build tools on Windows, Xcode CLI tools on macOS,
+`libwebkit2gtk-4.1-dev` and friends on Linux).
 
 ```bash
-bun install
-bun run tauri:build
+npm install
+npm run tauri dev      # run her
+npm run tauri build    # installers in src-tauri/target/release/bundle
 ```
 
-The installer lands in `src-tauri/target/release/bundle/` — a `.msi`/
-`.exe` on Windows, a `.dmg` on macOS, or a `.deb`/`.AppImage` on Linux.
-Double-click it and Luna is installed.
+`npm run cli:pack` builds the `luna` CLI as a sidecar; the dev and build
+commands already do this for you.
 
-**Option B — let GitHub Actions build it.** Push this repo to GitHub, then
-open the **Actions** tab → **Build desktop app** → **Run workflow**. A few
-minutes later, download your platform's installer from the run's
-**Artifacts** section. (For a formal release, push a tag like `v0.1.0` and
-the workflow drafts a GitHub Release with the installers attached.)
+Installers for Windows, macOS (Intel and Apple silicon) and Linux are built by
+GitHub Actions on every push to `main` — grab them from the run's artifacts, or
+tag `v*` to cut a release.
 
-Note: installers are unsigned, so Windows SmartScreen and macOS
-Gatekeeper will show a warning on first run — click through, it's your own
-app. Bundling/notarization can be added later if you want to share it
-beyond your team.
+## Where she keeps her things
 
-Transparency notes: on Linux the transparent window needs a compositor
-(any modern desktop has one); on Windows it just works. Ghost mode
-(click-through) is best on Windows/macOS — on Linux it depends on the
-compositor, and Luna falls back to interactive if the OS refuses.
+| | |
+| --- | --- |
+| Windows | `%APPDATA%\com.luna.companion` |
+| macOS | `~/Library/Application Support/com.luna.companion` |
+| Linux | `~/.local/share/com.luna.companion` |
 
-### As a web preview (sandbox)
+`luna.json` is her settings, stats and build memory. `diary.jsonl` is one line
+per build she has watched. Delete either and she starts fresh.
 
-```bash
-bun run dev
-```
+## Next
 
-The same pet behavior renders in the browser — she wanders around the
-page, you can grab and throw her, pet her, wake her, right-click her.
-Good for iterating without a Rust toolchain. (On the real desktop, the
-page is the pet window; in the preview she just walks around the tab.)
-
-## Project layout
-
-```
-src/
-  main.tsx                     — bootstrap (no router, no auth, no backend)
-  pages/Companion.tsx          — the screen-pet brain: walking, grab/throw
-                                 physics, sleep, bubbles, right-click menu
-  components/luna/Luna.tsx     — the pixel-cat sprite (walk / sit / sleep /
-                                 dangle / fly / happy poses)
-  components/luna/useLunaSounds.ts — synthesized meow/purr/squeak/whee/thud
-  lib/desktop.ts               — Tauri bridge (monitor bounds, window move,
-                                 ghost mode, close)
-src-tauri/                     — Tauri v2 desktop shell
-```
-
-### App icon
-
-`src-tauri/icons/` is generated from Luna's own pixel art — no designer
-needed. To regenerate it after tweaking her sprite:
-
-```bash
-bun run tauri:icons
-```
-
-## Keeping it featherweight
-
-- One React screen, no router, no state library, no images — Luna is
-  hand-drawn SVG rectangles and everything else is plain DOM.
-- Sounds are generated, not loaded: zero network requests at runtime.
-- No backend at all — the pet runs fully offline and holds onto nothing.
-  The only thing she remembers is your sound preference (`localStorage`).
+Real AI chat (an API key and she can read a failing test back to you in her own
+words), machine awareness (CPU, git status, lock/unlock), outfits and
+achievements, a Pomodoro she runs on her own head, TTS, and a shareable
+`luna.toml` so a teammate can clone your exact cat.

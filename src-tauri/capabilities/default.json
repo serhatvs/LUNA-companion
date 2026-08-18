@@ -1,11 +1,7 @@
 {
   "$schema": "../gen/schemas/desktop-schema.json",
   "identifier": "default",
-  "description": "Default capability for the main window",
-  "windows": ["main"],
-  "permissions": [
-    "core:default",
-    "core:window:allow-close",
-    "core:event:allow-listen"
-  ]
+  "description": "Luna's overlay window talks to the core event bus and her own commands only.",
+  "windows": ["luna"],
+  "permissions": ["core:default"]
 }
