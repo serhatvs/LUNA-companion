@@ -125,6 +125,13 @@
   }
 }
 
+/* Desktop pet: the Tauri window is transparent, so only Luna's card is
+   visible floating over the desktop — the page behind it must stay clear. */
+html.luna-desktop,
+html.luna-desktop body {
+  background-color: transparent;
+}
+
 /* ---------- Luna's room (desktop pet scene) ---------- */
 :root {
   --luna-sky-1: oklch(0.975 0.008 90);

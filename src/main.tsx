@@ -2,8 +2,14 @@ import "@vly-ai/integrations";
 import { VlyToolbar } from "../vly-toolbar-readonly.tsx";
 import React, { StrictMode, useEffect } from "react";
 import { createRoot } from "react-dom/client";
+import { isTauri } from "./lib/desktop.ts";
 import Companion from "./pages/Companion.tsx";
 import "./index.css";
+
+// As a desktop pet the window is transparent and frameless — the page
+// background must be transparent too, or it would paint over the whole
+// window instead of just Luna's card.
+if (isTauri()) document.documentElement.classList.add("luna-desktop");
 
 // The whole app is one window: the companion. No router, no auth, no
 // backend — Luna is a local desktop pet and everything she does lives here.

@@ -7,13 +7,23 @@ the whole app: no landing page, no workspace, no login, no backend.
 
 ## What it is
 
-- **A desktop app, not a website.** Built with [Tauri v2](https://tauri.app),
+- **A desktop pet, not a website.** Built with [Tauri v2](https://tauri.app),
   so it runs inside your OS's own webview — a few MB on disk, near-zero idle
   CPU, and it shares the browser engine you already have instead of bundling
   a second one (that's what keeps it light while your memory is busy with
   builds and editors).
-- **Companion only.** There is no chat, no dashboard, no accounts. The window
-  opens and Luna is already there.
+- **It floats over your desktop.** The window is frameless and transparent,
+  docks to the bottom-center of your screen above the taskbar, and stays on
+  top of everything — just a little card with Luna on it, like ComNyang or
+  any classic desktop pet. No chrome, no taskbar entry, no squaring off
+  against your editor.
+- **Drag her anywhere.** Grab the title bar or the footer and move the card
+  wherever you like — she'll stay there.
+- **Ghost mode.** Click the ghost button (or press **Ctrl+Alt+L** anywhere)
+  and Luna stops catching clicks entirely: she floats over your code without
+  blocking a single click. Press Ctrl+Alt+L again to bring her back.
+- **Companion only.** There is no chat, no dashboard, no accounts. She opens
+  and Luna is already there.
 - **Play while you wait.** Pet her (she squishes, purrs, and says something
   sweet), drag the yarn ball and she fetches it, tap her bowl to feed her.
   Leave her alone for a couple of minutes and she dozes off — click to wake
@@ -39,9 +49,11 @@ bun run tauri:dev       # run in a real desktop window
 bun run tauri:build     # produce the app binary
 ```
 
-The window opens small (420×660) and stays on top of your editor — that's
-the point. To change the size or turn off always-on-top, edit
-`src-tauri/tauri.conf.json`.
+The window opens as a small transparent card (380×440) docked at the
+bottom-center of your screen, always on top of your editor — that's the
+point. To change the size, position, or always-on-top behavior, edit
+`src-tauri/tauri.conf.json` and the `dock_bottom_center` function in
+`src-tauri/src/lib.rs`.
 
 ### Downloading / installing the app
 
@@ -70,6 +82,11 @@ Note: installers are unsigned, so Windows SmartScreen and macOS
 Gatekeeper will show a warning on first run — click through, it's your own
 app. Bundling/notarization can be added later if you want to share it
 beyond your team.
+
+Transparency notes: on Linux the transparent window needs a compositor
+(any modern desktop has one); on Windows it just works. Ghost mode
+(click-through) is best on Windows/macOS — on Linux it depends on the
+compositor, and the app falls back to interactive if the OS refuses.
 
 ### As a web preview (sandbox)
 
