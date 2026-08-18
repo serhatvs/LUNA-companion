@@ -63,7 +63,6 @@ body {
 
 #cat {
   display: block;
-  image-rendering: pixelated;
   /* A soft contact shadow sells the "sitting on your desktop" illusion. */
   filter: drop-shadow(0 2px 3px rgba(20, 18, 30, 0.28));
 }

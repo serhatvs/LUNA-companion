@@ -47,6 +47,7 @@ async function start(): Promise<void> {
   const panel = new Panel();
   const laser = new Laser();
   const cat = new CatRenderer(canvas);
+  await cat.load();
   const luna = new Luna(
     root,
     cat,

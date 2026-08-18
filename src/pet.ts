@@ -694,14 +694,16 @@ export class Luna {
     this.pushedRect = { x: this.x, y: this.y };
 
     const { ox, oy, scale } = this.world;
-    const size = this.size;
     const rects: bridge.Rect[] = [];
     if (!this.ghostForced && !this.mind.settings.ghost) {
+      // Only the drawn cat catches the mouse - her cell is padded out to fit
+      // whichever pose is tallest, and that padding must stay click-through.
+      const hb = this.cat.hitBox;
       rects.push({
-        x: ox + this.x * scale,
-        y: oy + this.y * scale,
-        w: size.w * scale,
-        h: size.h * scale,
+        x: ox + (this.x + hb.x) * scale,
+        y: oy + (this.y + hb.y) * scale,
+        w: hb.w * scale,
+        h: hb.h * scale,
       });
     }
     const panelRect = this.panel.rect();

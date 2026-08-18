@@ -31,7 +31,8 @@ hungry. Pet her, feed her, play with her, and she grows a bond stat and levels
 up. All of it survives a restart, including the hours she spent alone while the
 app was closed.
 
-**She is a real screen pet.** Grab her and throw her — she has weight, bounces,
+**She is a real screen pet.** She turns side-on and walks on four legs when
+she is going somewhere, and faces you when she sits. Grab her and throw her — she has weight, bounces,
 squashes on landing, and grabs the edge of your screen on the way past. She
 climbs the side of a monitor, dangles from the top, wanders between displays,
 chases a laser dot when you double-click her, grooms, stretches after a nap, and
@@ -81,13 +82,13 @@ launch, so nothing else on the machine can drive your cat.
 
 - **No framework.** No React, no Tailwind, no UI kit — the whole frontend is a
   few kilobytes of plain TypeScript.
-- **No image assets.** Luna is drawn as a 26×24 grid of pixels from discs and
-  rectangles, so every pose is parameterised (the tail curls, she squashes when
-  she lands) and a new fur colour is a five-entry palette swap.
-- **Nothing repaints.** Her window is one transparent sheet across all your
-  monitors, but only a 78×72 box is ever drawn into, at about 14 frames a
-  second, and moving her is a compositor transform. When she is sitting still
-  with her eyes open, nothing is drawn at all.
+- **One image.** All eleven poses live in a single 240 KB PNG, packed by
+  `scripts/extract-sprites.py` from the hand-drawn sheet. Other coats are not
+  extra artwork: her fur has no hue to rotate, so a tint remaps brightness
+  through a colour ramp at runtime and leaves her eyes, ears and nose alone.
+- **Almost nothing repaints.** Her window is one transparent sheet across all
+  your monitors, but only her own small box is ever drawn into, and moving her
+  is a compositor transform rather than a repaint.
 - **The heavy lifting is Rust.** Hit testing, click-through, the tray, the
   overlay and the CLI channel are all native; the webview just draws a cat.
 
