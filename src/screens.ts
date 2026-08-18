@@ -50,3 +50,11 @@ export function neighbour(
   }
   return best;
 }
+
+/**
+ * Is that side of a screen a wall she can climb, or the way to the monitor
+ * next door? An edge with another display behind it is a doorway, and pawing
+ * at it would look ridiculous.
+ */
+export const isWall = (screens: readonly Screen[], m: Screen, dir: 1 | -1): boolean =>
+  neighbour(screens, dir > 0 ? m.x + m.w + 1 : m.x - 1, dir) === null;

@@ -11,7 +11,7 @@ import type { Mind } from "./mind";
 import { Bubble, Laser, Panel, Timer, puff } from "./ui";
 import { duration, errorHint, line, type LineKey } from "./chatter";
 import * as bridge from "./bridge";
-import { nearest, neighbour, onScreen } from "./screens";
+import { isWall, nearest, neighbour, onScreen } from "./screens";
 
 export interface World {
   /** Window size in CSS px. */
@@ -260,21 +260,33 @@ export class Luna {
     } else {
       this.target = m.x + rand(span * 0.1, span * 0.9);
     }
+    this.intent = "wander";
     this.begin("walk", 90000);
   }
 
   private startClimb(): void {
     const m = this.here;
-    const left = this.x - m.x;
-    const right = m.x + m.w - (this.x + this.size.w);
-    this.wall = left < right ? -1 : 1;
+    const canLeft = isWall(this.world.monitors, m, -1);
+    const canRight = isWall(this.world.monitors, m, 1);
+
+    // On a screen with a monitor either side there is nothing to climb, so
+    // she goes for a wander instead of pawing at thin air.
+    if (!canLeft && !canRight) {
+      this.walkSomewhere(true);
+      return;
+    }
+
+    const nearerIsLeft = this.x - m.x < m.x + m.w - (this.x + this.size.w);
+    this.wall = canLeft && canRight ? (nearerIsLeft ? -1 : 1) : canLeft ? -1 : 1;
     this.target = this.wall < 0 ? m.x : m.x + m.w - this.size.w;
+    this.intent = "climb";
     this.begin("walk", 20000);
-    // `walk` hands over to `climb` when it reaches the wall.
-    this.climbAfterWalk = true;
   }
 
-  private climbAfterWalk = false;
+  /** What the current walk is for. Held as intent rather than a leftover flag,
+   *  because a walk that gets interrupted must not hand its plans to the next
+   *  one - that is how a stroll to the far screen used to end in a climb. */
+  private intent: "wander" | "climb" = "wander";
 
   goSleep(): void {
     this.begin("sleep", rand(50_000, 200_000));
@@ -353,8 +365,8 @@ export class Luna {
     document.getElementById("stage")!.appendChild(el);
     this.snack = { x, y, el };
     this.target = x - this.size.w / 2 + 8;
+    this.intent = "wander";
     this.begin("walk", 20000);
-    this.climbAfterWalk = false;
   }
 
   summon(): void {
@@ -542,23 +554,34 @@ export class Luna {
     const top = m.y;
 
     if (this.x < left) {
-      this.x = left;
-      this.vx = Math.abs(this.vx) * 0.45;
-      this.squash = -0.35;
-      // A cat thrown at a wall grabs it.
-      if (this.vy > -0.2 && chance(0.55)) {
-        this.wall = -1;
-        this.begin("climb", 1e9);
-        return;
+      const over = neighbour(this.world.monitors, m.x - 1, -1);
+      if (over) {
+        // Not a wall - she flies on to the screen next door.
+        this.x = over.x + over.w - this.size.w - 2;
+      } else {
+        this.x = left;
+        this.vx = Math.abs(this.vx) * 0.45;
+        this.squash = -0.35;
+        // A cat thrown at a wall grabs it.
+        if (this.vy > -0.2 && chance(0.55)) {
+          this.wall = -1;
+          this.begin("climb", 1e9);
+          return;
+        }
       }
     } else if (this.x > right) {
-      this.x = right;
-      this.vx = -Math.abs(this.vx) * 0.45;
-      this.squash = -0.35;
-      if (this.vy > -0.2 && chance(0.55)) {
-        this.wall = 1;
-        this.begin("climb", 1e9);
-        return;
+      const over = neighbour(this.world.monitors, m.x + m.w + 1, 1);
+      if (over) {
+        this.x = over.x + 2;
+      } else {
+        this.x = right;
+        this.vx = -Math.abs(this.vx) * 0.45;
+        this.squash = -0.35;
+        if (this.vy > -0.2 && chance(0.55)) {
+          this.wall = 1;
+          this.begin("climb", 1e9);
+          return;
+        }
       }
     }
 
@@ -593,8 +616,8 @@ export class Luna {
       this.x = Math.abs(dx) < 6 ? this.target : this.x;
       // Never end a walk standing on no screen at all.
       if (!this.onScreen(this.x + this.size.w / 2)) this.crossScreens(this.facing);
-      if (this.climbAfterWalk) {
-        this.climbAfterWalk = false;
+      if (this.intent === "climb") {
+        this.intent = "wander";
         this.begin("climb", 1e9);
         return;
       }

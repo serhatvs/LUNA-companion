@@ -6,7 +6,7 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 
-import { nearest, neighbour, onScreen, type Screen } from "../src/screens.ts";
+import { isWall, nearest, neighbour, onScreen, type Screen } from "../src/screens.ts";
 
 // The developer's actual layout, converted to window coordinates: a left-hand
 // screen, a 1280px hole, the main screen, a 384px hole, then the right screen.
@@ -54,6 +54,21 @@ test("falls back to the closest screen when stranded", () => {
   assert.equal(nearest(SCREENS, 4400, fallback), RIGHT, "nearly on the right screen");
   assert.equal(nearest(SCREENS, 3000, fallback), MAIN);
   assert.equal(nearest([], 10, fallback), fallback);
+});
+
+test("only outer edges are walls she can climb", () => {
+  assert.equal(isWall(SCREENS, LEFT, -1), true, "nothing to the left of the left screen");
+  assert.equal(isWall(SCREENS, LEFT, 1), false, "the main screen is that way");
+  assert.equal(isWall(SCREENS, MAIN, -1), false);
+  assert.equal(isWall(SCREENS, MAIN, 1), false, "a screen in the middle has no walls at all");
+  assert.equal(isWall(SCREENS, RIGHT, -1), false);
+  assert.equal(isWall(SCREENS, RIGHT, 1), true, "nothing to the right of the right screen");
+});
+
+test("a single screen is walls on both sides", () => {
+  const alone: Screen[] = [{ x: 0, y: 0, w: 1920, h: 1080 }];
+  assert.equal(isWall(alone, alone[0]!, -1), true);
+  assert.equal(isWall(alone, alone[0]!, 1), true);
 });
 
 test("adjacent screens need no jump at all", () => {
