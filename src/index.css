@@ -125,94 +125,60 @@
   }
 }
 
-/* Desktop pet: the Tauri window is transparent, so only Luna's card is
-   visible floating over the desktop — the page behind it must stay clear. */
+/* Desktop pet: the Tauri window is transparent, so only Luna herself is
+   visible floating over the desktop — the page behind her must stay clear. */
 html.luna-desktop,
 html.luna-desktop body {
   background-color: transparent;
 }
 
-/* ---------- Luna's room (desktop pet scene) ---------- */
-:root {
-  --luna-sky-1: oklch(0.975 0.008 90);
-  --luna-sky-2: oklch(0.955 0.018 165);
-  --luna-sky-3: oklch(0.885 0.045 180);
-  --luna-desk-1: oklch(0.87 0.03 175);
-  --luna-desk-2: oklch(0.79 0.04 170);
-  --luna-desk-edge: oklch(1 0 0 / 0.35);
-  --luna-star: oklch(0.62 0.08 190 / 0.55);
-  --luna-moon: oklch(0.94 0.05 95);
-  --luna-moon-glow: oklch(0.92 0.05 95 / 0.5);
-  --luna-cloud: oklch(1 0 0 / 0.5);
+/* ---------- Luna the screen pet ---------- */
+
+/* Tumbling while flying after a throw. */
+.luna-spin {
+  animation: luna-spin 0.4s linear infinite;
 }
 
-.dark {
-  --luna-sky-1: oklch(0.2 0.02 250);
-  --luna-sky-2: oklch(0.23 0.025 240);
-  --luna-sky-3: oklch(0.29 0.04 220);
-  --luna-desk-1: oklch(0.32 0.03 215);
-  --luna-desk-2: oklch(0.25 0.025 225);
-  --luna-desk-edge: oklch(1 0 0 / 0.12);
-  --luna-star: oklch(0.85 0.06 190 / 0.9);
-  --luna-moon: oklch(0.93 0.05 95);
-  --luna-moon-glow: oklch(0.92 0.05 95 / 0.35);
-  --luna-cloud: oklch(1 0 0 / 0.07);
+@keyframes luna-spin {
+  to {
+    transform: rotate(360deg);
+  }
 }
 
-.luna-sky {
-  background: linear-gradient(
-    to bottom,
-    var(--luna-sky-1),
-    var(--luna-sky-2) 52%,
-    var(--luna-sky-3)
-  );
+/* Hanging from the scruff while grabbed. */
+.luna-sway {
+  transform-origin: 50% 12%;
+  animation: luna-sway 1.5s ease-in-out infinite;
 }
 
-.luna-desk {
-  background: linear-gradient(to bottom, var(--luna-desk-1), var(--luna-desk-2));
-}
-
-.luna-moon {
-  background:
-    radial-gradient(circle at 32% 30%, oklch(1 0 0 / 0.25) 0 3px, transparent 4px),
-    radial-gradient(circle at 68% 62%, oklch(1 0 0 / 0.2) 0 4px, transparent 5px),
-    var(--luna-moon);
-  box-shadow: 0 0 26px 8px var(--luna-moon-glow);
-}
-
-.luna-star {
-  background: var(--luna-star);
-  animation: luna-twinkle 3.2s ease-in-out infinite;
-}
-
-@keyframes luna-twinkle {
+@keyframes luna-sway {
   0%,
   100% {
-    opacity: 0.25;
-    transform: scale(0.85);
+    rotate: -7deg;
   }
   50% {
-    opacity: 1;
-    transform: scale(1.1);
+    rotate: 7deg;
   }
 }
 
-.luna-cloud {
-  background: var(--luna-cloud);
-  border-radius: 9999px;
-  filter: blur(3px);
-  animation: luna-drift 30s linear infinite;
+/* Puff of dust when she lands. */
+.luna-dust {
+  background: radial-gradient(ellipse, rgb(255 255 255 / 0.85), transparent 70%);
+  animation: luna-dust 0.45s ease-out forwards;
 }
 
-@keyframes luna-drift {
+@keyframes luna-dust {
   from {
-    transform: translateX(-20vw);
+    opacity: 0.9;
+    transform: scale(0.35);
   }
   to {
-    transform: translateX(110vw);
+    opacity: 0;
+    transform: scale(1.7);
   }
 }
 
+/* Floating z's while she sleeps. */
 .luna-zzz {
   animation: luna-zzz 2.4s ease-out infinite;
 }
@@ -229,4 +195,24 @@ html.luna-desktop body {
     opacity: 0;
     transform: translateY(-16px) scale(1.3);
   }
+}
+
+/* Web preview backdrop — a stand-in "desktop" so the sandbox shows the pet
+   wandering around. The real desktop app is just the pet window. */
+.luna-web-bg {
+  background:
+    radial-gradient(1200px 700px at 75% -10%, oklch(0.93 0.05 180 / 0.5), transparent 60%),
+    linear-gradient(to bottom, var(--background), color-mix(in oklch, var(--background), var(--primary) 7%));
+}
+
+.luna-web-bg::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(to right, var(--border) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--border) 1px, transparent 1px);
+  background-size: 48px 48px;
+  mask-image: linear-gradient(to bottom, rgb(0 0 0 / 0.5), transparent 70%);
+  opacity: 0.5;
 }

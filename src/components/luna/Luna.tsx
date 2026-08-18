@@ -2,14 +2,22 @@ import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
 
 /**
- * Luna — the tiny pixel cat that lives in Code Companion. Rendered as crisp
- * SVG rects so she stays featherweight (no image assets, no blur filters).
+ * Luna — the tiny pixel cat that lives on your screen. Rendered as crisp SVG
+ * rects so she stays featherweight (no image assets, no blur filters).
  *
  * The body is a fixed 16×16 grid with three slots: the eyes ({L}/{R}), the
- * nose ({N}), and a mouth ({M}) that only appears while she's eating.
+ * nose ({N}), and a mouth ({M}). Poses vary the bottom rows (legs vs sitting)
+ * and the eye/mouth expression; "dangle" and "fly" flip her upside down.
  */
 
-export type LunaMood = "idle" | "sleeping" | "eating";
+export type LunaPose =
+  | "idle"
+  | "walk"
+  | "sit"
+  | "sleep"
+  | "dangle"
+  | "fly"
+  | "happy";
 
 const BODY = [
   "...##......##...",
@@ -24,10 +32,31 @@ const BODY = [
   ".######{N}######.",
   ".######{M}#######.",
   "..#############..",
+];
+
+// Bottom rows vary with the pose.
+const LEGS_STAND = [
   "..###########....",
   "..###CCCC###.....",
   "..######.........",
-  "................",
+];
+
+const LEGS_WALK_A = [
+  "..###########....",
+  "..###CCCC###.....",
+  "..##......##.....",
+];
+
+const LEGS_WALK_B = [
+  "..###########....",
+  "..###CCCC###.....",
+  "..###....###.....",
+];
+
+const LEGS_SIT = [
+  "..###########....",
+  "..#########......",
+  "..##########.....",
 ];
 
 const COLORS: Record<string, string> = {
@@ -36,21 +65,25 @@ const COLORS: Record<string, string> = {
   E: "#fdf6ee", // cream eye
   "-": "#585b62", // eyelid
   "=": "#26282e", // closed eye (sleeping)
+  X: "#26282e", // worried eye (dangling)
   C: "#0f766e", // teal collar
-  M: "#e58aa0", // mouth (eating)
+  M: "#e58aa0", // open mouth
 };
 
 interface LunaProps {
   className?: string;
-  mood?: LunaMood;
+  pose?: LunaPose;
+  /** Which way she faces: 1 = right, -1 = left. */
+  facing?: 1 | -1;
 }
 
-export function Luna({ className, mood = "idle" }: LunaProps) {
+export function Luna({ className, pose = "idle", facing = 1 }: LunaProps) {
   const [blinking, setBlinking] = useState(false);
+  const [step, setStep] = useState<0 | 1>(0);
 
-  // Blink every few seconds — but never while asleep or mid-meal.
+  // Blink every few seconds — never while asleep, dangling, or flying.
   useEffect(() => {
-    if (mood !== "idle") return;
+    if (pose !== "idle" && pose !== "walk" && pose !== "sit") return;
     let alive = true;
     let timeout: number;
 
@@ -70,13 +103,44 @@ export function Luna({ className, mood = "idle" }: LunaProps) {
       alive = false;
       window.clearTimeout(timeout);
     };
-  }, [mood]);
+  }, [pose]);
 
+  // Walk cycle: alternate the legs while walking.
+  useEffect(() => {
+    if (pose !== "walk") {
+      setStep(0);
+      return;
+    }
+    const id = window.setInterval(
+      () => setStep((value) => (value === 0 ? 1 : 0)),
+      170,
+    );
+    return () => window.clearInterval(id);
+  }, [pose]);
+
+  const upsideDown = pose === "dangle" || pose === "fly";
   const eyes =
-    mood === "sleeping" ? "==" : mood === "eating" ? "EE" : blinking ? "--" : "EE";
-  const mouth = mood === "eating" ? "M" : ".";
+    pose === "sleep"
+      ? "=="
+      : upsideDown
+        ? "XX"
+        : pose === "happy"
+          ? "EE"
+          : blinking
+            ? "--"
+            : "EE";
+  const mouth = pose === "happy" || upsideDown ? "M" : ".";
 
-  const rows = BODY.map((row) =>
+  const bottom =
+    pose === "sit" || pose === "sleep"
+      ? LEGS_SIT
+      : pose === "walk"
+        ? step === 0
+          ? LEGS_WALK_A
+          : LEGS_WALK_B
+        : LEGS_STAND;
+
+  const rows = [...BODY, ...bottom].map((row) =>
     row
       .split("{L}")
       .join(eyes[0])
@@ -88,45 +152,52 @@ export function Luna({ className, mood = "idle" }: LunaProps) {
       .join(mouth),
   );
 
+  const bob =
+    pose === "walk"
+      ? { y: [0, -1.6, 0] }
+      : pose === "idle" || pose === "happy"
+        ? { y: [0, -1, 0] }
+        : pose === "sleep"
+          ? { y: [0, -0.6, 0] }
+          : { y: 0 };
+
+  const bobDuration =
+    pose === "walk" ? 0.42 : pose === "idle" || pose === "happy" ? 3.2 : 4.6;
+
   return (
-    <motion.svg
-      viewBox="0 0 16 16"
-      shapeRendering="crispEdges"
+    <div
       className={className}
-      aria-hidden="true"
+      style={{
+        transform: `scaleX(${facing}) scaleY(${upsideDown ? -1 : 1})`,
+      }}
     >
-      <motion.g
-        style={{ transformOrigin: "50% 100%" }}
-        animate={
-          mood === "sleeping"
-            ? { y: [0, -0.7, 0] }
-            : mood === "eating"
-              ? { scaleY: [1, 0.94, 1] }
-              : { y: [0, -1.1, 0] }
-        }
-        transition={
-          mood === "sleeping"
-            ? { duration: 4.6, repeat: Infinity, ease: "easeInOut" }
-            : mood === "eating"
-              ? { duration: 0.34, repeat: Infinity, ease: "easeInOut" }
-              : { duration: 3.2, repeat: Infinity, ease: "easeInOut" }
-        }
+      <motion.svg
+        viewBox="0 0 16 16"
+        shapeRendering="crispEdges"
+        className="h-full w-full"
+        aria-hidden="true"
       >
-        {rows.map((row, y) =>
-          [...row].map((cell, x) =>
-            cell === "." || cell === " " ? null : (
-              <rect
-                key={`${x}-${y}`}
-                x={x}
-                y={y}
-                width={1}
-                height={1}
-                fill={COLORS[cell]}
-              />
+        <motion.g
+          style={{ transformOrigin: "50% 100%" }}
+          animate={bob}
+          transition={{ duration: bobDuration, repeat: Infinity, ease: "easeInOut" }}
+        >
+          {rows.map((row, y) =>
+            [...row].map((cell, x) =>
+              cell === "." || cell === " " ? null : (
+                <rect
+                  key={`${x}-${y}`}
+                  x={x}
+                  y={y}
+                  width={1}
+                  height={1}
+                  fill={COLORS[cell]}
+                />
+              ),
             ),
-          ),
-        )}
-      </motion.g>
-    </motion.svg>
+          )}
+        </motion.g>
+      </motion.svg>
+    </div>
   );
 }

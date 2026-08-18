@@ -14,16 +14,17 @@
       {
         "label": "main",
         "title": "Code Companion · Luna",
-        "width": 380,
-        "height": 440,
-        "minWidth": 360,
-        "minHeight": 420,
+        "width": 150,
+        "height": 180,
+        "minWidth": 150,
+        "minHeight": 180,
         "resizable": false,
         "decorations": false,
         "transparent": true,
         "alwaysOnTop": true,
         "shadow": false,
-        "skipTaskbar": true
+        "skipTaskbar": true,
+        "focus": false
       }
     ],
     "security": {

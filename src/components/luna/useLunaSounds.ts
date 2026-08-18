@@ -98,15 +98,33 @@ export function useLunaSounds(enabled: boolean) {
     [play],
   );
 
-  /** Quick crunchy nom-noms. */
-  const eat = useCallback(
+  /** A tiny startled squeak when she's grabbed. */
+  const squeak = useCallback(
     () =>
       play((ctx) => {
-        tone(ctx, { type: "square", from: 220, to: 180, dur: 0.07, gain: 0.045 });
-        tone(ctx, { type: "square", from: 240, to: 190, dur: 0.07, gain: 0.045, delay: 0.12 });
+        tone(ctx, { type: "square", from: 900, to: 1250, dur: 0.07, gain: 0.055 });
+        tone(ctx, { type: "square", from: 740, to: 980, dur: 0.09, gain: 0.05, delay: 0.09 });
       }),
     [play],
   );
 
-  return { meow, purr, chirp, eat };
+  /** A soft descending "wheee!" while she's flying. */
+  const whee = useCallback(
+    () =>
+      play((ctx) => {
+        tone(ctx, { type: "triangle", from: 760, to: 210, dur: 0.5, gain: 0.07 });
+      }),
+    [play],
+  );
+
+  /** A gentle thud when she lands. */
+  const thud = useCallback(
+    () =>
+      play((ctx) => {
+        tone(ctx, { type: "sine", from: 130, to: 55, dur: 0.14, gain: 0.13 });
+      }),
+    [play],
+  );
+
+  return { meow, purr, chirp, squeak, whee, thud };
 }

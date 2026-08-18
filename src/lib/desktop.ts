@@ -1,4 +1,8 @@
-import { getCurrentWindow } from "@tauri-apps/api/window";
+import {
+  currentMonitor,
+  getCurrentWindow,
+  LogicalPosition,
+} from "@tauri-apps/api/window";
 import { invoke } from "@tauri-apps/api/core";
 
 /**
@@ -9,6 +13,52 @@ import { invoke } from "@tauri-apps/api/core";
 
 export function isTauri(): boolean {
   return typeof window !== "undefined" && "__TAURI_INTERNALS__" in window;
+}
+
+/** Logical (CSS-pixel) screen bounds of the monitor the pet window is on. */
+export interface ScreenBox {
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+}
+
+/**
+ * The pet window's current position, in logical pixels. Returns null in the
+ * browser (the pet is positioned with CSS there instead).
+ */
+export async function getWindowPos(): Promise<{ x: number; y: number } | null> {
+  if (!isTauri()) return null;
+  try {
+    const pos = await getCurrentWindow().outerPosition();
+    return { x: pos.x, y: pos.y };
+  } catch {
+    return null;
+  }
+}
+
+/** The monitor the window sits on, as a logical screen rectangle. */
+export async function screenBox(): Promise<ScreenBox | null> {
+  if (!isTauri()) return null;
+  try {
+    const monitor = await currentMonitor();
+    if (!monitor) return null;
+    const size = monitor.size.toLogical(monitor.scaleFactor);
+    const pos = monitor.position.toLogical(monitor.scaleFactor);
+    return { x: pos.x, y: pos.y, w: size.width, h: size.height };
+  } catch {
+    return null;
+  }
+}
+
+/** Move the pet window (logical pixels). Best-effort, safe to spam. */
+export async function moveWindow(x: number, y: number): Promise<void> {
+  if (!isTauri()) return;
+  try {
+    await getCurrentWindow().setPosition(new LogicalPosition(x, y));
+  } catch {
+    // Ignore — the OS may briefly refuse while dragging, it self-corrects.
+  }
 }
 
 /**

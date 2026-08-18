@@ -7,8 +7,8 @@ import Companion from "./pages/Companion.tsx";
 import "./index.css";
 
 // As a desktop pet the window is transparent and frameless — the page
-// background must be transparent too, or it would paint over the whole
-// window instead of just Luna's card.
+// background must be transparent too, or it would paint a solid rectangle
+// over the desktop instead of just Luna.
 if (isTauri()) document.documentElement.classList.add("luna-desktop");
 
 // The whole app is one window: the companion. No router, no auth, no
@@ -88,9 +88,13 @@ function NavSyncer() {
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <RootErrorBoundary>
-      <ToolbarErrorBoundary>
-        <VlyToolbar />
-      </ToolbarErrorBoundary>
+      {/* The platform toolbar belongs to the web preview only — inside the
+          tiny desktop pet window it would cover Luna. */}
+      {!isTauri() && (
+        <ToolbarErrorBoundary>
+          <VlyToolbar />
+        </ToolbarErrorBoundary>
+      )}
       <NavSyncer />
       <Companion />
     </RootErrorBoundary>
