@@ -4,6 +4,8 @@
 //! It shares source with the app but links none of Tauri - it is a few hundred
 //! kilobytes that only knows how to talk to a running cat.
 
+// The CLI only needs a couple of these path helpers.
+#[allow(dead_code)]
 #[path = "../paths.rs"]
 mod paths;
 

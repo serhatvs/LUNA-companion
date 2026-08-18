@@ -9,6 +9,9 @@ export default defineConfig({
   server: {
     port: 5173,
     strictPort: true,
+    // Never watch the Rust build output - the running binary is locked on
+    // Windows and the watcher dies on it.
+    watch: { ignored: ["**/src-tauri/**", "**/dist/**"] },
   },
   build: {
     target: "esnext",
