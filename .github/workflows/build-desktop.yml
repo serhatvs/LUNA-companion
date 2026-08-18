@@ -16,15 +16,19 @@ jobs:
         include:
           - platform: "macos-latest"
             args: "--target aarch64-apple-darwin"
+            name: "macos-apple-silicon"
           - platform: "macos-latest"
             args: "--target x86_64-apple-darwin"
+            name: "macos-intel"
           - platform: "ubuntu-22.04"
             args: ""
+            name: "linux"
           # Windows: build only the NSIS .exe installer. The default also builds
           # an .msi, which downloads the WiX toolset mid-build and often fails
           # on GitHub runners.
           - platform: "windows-latest"
             args: "--bundles nsis"
+            name: "windows"
     runs-on: ${{ matrix.platform }}
     steps:
       - uses: actions/checkout@v4
@@ -58,3 +62,12 @@ jobs:
           releaseDraft: true
           prerelease: false
           args: ${{ matrix.args }}
+
+      # Always upload the installers as artifacts so they can be downloaded
+      # straight from the run page, even without a tagged release.
+      - name: Upload installers
+        uses: actions/upload-artifact@v4
+        with:
+          name: luna-${{ matrix.name }}
+          path: src-tauri/target/**/release/bundle/
+          if-no-files-found: error
