@@ -20,8 +20,11 @@ jobs:
             args: "--target x86_64-apple-darwin"
           - platform: "ubuntu-22.04"
             args: ""
+          # Windows: build only the NSIS .exe installer. The default also builds
+          # an .msi, which downloads the WiX toolset mid-build and often fails
+          # on GitHub runners.
           - platform: "windows-latest"
-            args: ""
+            args: "--bundles nsis"
     runs-on: ${{ matrix.platform }}
     steps:
       - uses: actions/checkout@v4
