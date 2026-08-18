@@ -55,7 +55,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
 
       - uses: dtolnay/rust-toolchain@stable
         with:
@@ -69,6 +69,11 @@ jobs:
       - name: Install frontend dependencies
         run: npm install
 
+      - name: Check
+        run: |
+          npx tsc --noEmit
+          node --test scripts/screens.test.ts
+
       # Builds the app *and*, via beforeBuildCommand, the `luna` CLI sidecar.
       - name: Build Luna
         run: npm run tauri -- build --target ${{ matrix.target }} --bundles ${{ matrix.bundles }}
@@ -79,7 +84,7 @@ jobs:
           mkdir -p out
           base="src-tauri/target/${{ matrix.target }}/release/bundle"
           find "$base" -type f \
-            \( -name "*.exe" -o -name "*.msi" -o -name "*.dmg" -o -name "*.AppImage" -o -name "*.deb" \) \
+            \( -name "*.exe" -o -name "*.dmg" -o -name "*.AppImage" -o -name "*.deb" \) \
             -exec cp {} out/ \;
           # The CLI is useful on its own, so ship it next to the installers.
           cp "src-tauri/binaries/luna-${{ matrix.target }}"* out/ 2>/dev/null || true
